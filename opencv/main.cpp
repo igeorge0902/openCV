@@ -24,6 +24,26 @@ using namespace boost::filesystem;
 using namespace cv;
 namespace fs = boost::filesystem;
 
+class ImageUtil{
+
+public:
+    static IplImage cvCreateImage_(const int& new_width, const int& new_height, IplImage& image) {
+
+     //   cvSize(new_width,new_height);
+
+        IplImage * new_img;
+
+        new_img = cvCreateImage(cvSize(new_width, new_height), image.depth, image.nChannels);
+
+        return *new_img;
+    }
+    
+    ImageUtil();
+    
+    ~ImageUtil();
+    
+};
+
 class FileUtil{
     
 public:
@@ -48,11 +68,11 @@ public:
         //std::streambuf* buf_ptr =  in.rdbuf();
         fsize = in.tellg() - fsize;
 
-        std::cout << "fsize : " << fsize << std::endl;
+        // std::cout << "file size : " << fsize << " bytes" << std::endl;
         return fsize;
     }
 
-    std::vector<String> list_of_filesnames;
+    std::vector<std::string> list_of_filesnames;
 
     void listdir(const char* dirname, int lvl)
     {
@@ -94,7 +114,7 @@ public:
                     }
                     /* We add the names of files to a vector to use it later */
                     list_of_filesnames.push_back(entry->d_name);
-                    printf("%s\n", entry->d_name);
+                   // printf("%s\n", entry->d_name);
                 }
             }
         }
@@ -121,17 +141,151 @@ FileUtil::~FileUtil(void)
     std::cout << "Object is being deleted" << std::endl;
 }
 
+ImageUtil::ImageUtil(void){
+
+    std::cout << "Object is being created" << std::endl;
+
+}
+
+ImageUtil::~ImageUtil(void){
+    
+    std::cout << "Object is being deleted" << std::endl;
+    
+}
+
 int main(int argc, const char * argv[]) {
     
+    std::string directoryName_ = "/Users/georgegaspar/Pictures/movies/";
+    const char * directoryName = directoryName_.c_str();
+
     FileUtil fileutil;
     
     std::cout << CV_VERSION << "\n";
     
-    fileutil.listdir("/Users/georgegaspar/Pictures/movies", 0);
+    fileutil.listdir(directoryName, 0);
     
-    String moviename = fileutil.list_of_filesnames.at(16);
-    std::cout << moviename << std::endl;
+    std::string *moviename;
+    std::streampos fsize_;
+    std::streampos fsize2_;
+    std::vector<const char *> filesToBeResized;
+    Mat image;
+    Mat dst;
+    IplImage imageToResize;
+    IplImage * new_img;
+    IplImage * new_img2;
+    IplImage * new_img3 = nullptr;
+
     
+    for(auto i = 0; i != fileutil.list_of_filesnames.size(); i++) {
+        
+        moviename = &fileutil.list_of_filesnames.at(i);
+        
+        std::string a = directoryName_ + *moviename;
+        const char *b = a.c_str();
+        
+        fsize_ = FileUtil::filesize(b);
+        
+        // first pass of resize for every image bigger than 250000 bytes
+        if (fsize_ > 250000) {
+            
+            imageToResize = *cvLoadImage(b, CV_LOAD_IMAGE_UNCHANGED);
+            
+            double width = 0.75;
+            double height = 0.75;
+            
+            const int new_width = (int) ((float) imageToResize.width * width);
+            const int new_height = (int) ((float) imageToResize.height * height);
+            
+            new_img = cvCreateImage(cvSize(new_width, new_height), imageToResize.depth, imageToResize.nChannels);
+            cvResize(&imageToResize, new_img);
+            
+         //   cvSaveImage(b,new_img);
+            
+            std::vector<IplImage> list_of_images;
+
+            /* without image saved to disk */
+            // it will get blurred!!! -> it works like a xerox. The more "copy" you create, the more data you loose.  Funny.
+            
+            // Local variable declaration:
+            int a = 0;
+            /*
+            do{
+                
+                a = a + 1;
+                
+                const int new_width = (int) ((float) imageToResize.width * width);
+                const int new_height = (int) ((float) imageToResize.height * height);
+                
+                if (list_of_images.empty() == true) {
+                
+                // resize a new image
+                new_img2 = cvCreateImage(cvSize(new_width, new_height), new_img->depth, new_img->nChannels);
+                cvResize(new_img, new_img2);
+                
+                list_of_images.push_back(*new_img2);
+                
+                cvReleaseImage(&new_img2);
+
+
+                } else {
+                    
+                 if (new_img3 != NULL) {
+                 
+                     cvReleaseImage(&new_img3);
+
+                 }
+                    
+                const int new_width = (int) ((float) list_of_images.at(0).width * 0.99);
+                const int new_height = (int) ((float) list_of_images.at(0).height * 0.99);
+                    
+                new_img3 = cvCreateImage(cvSize(new_width, new_height), list_of_images.at(0).depth, list_of_images.at(0).nChannels);
+                    
+                cvResize(&list_of_images.at(0), new_img3);
+                    
+                list_of_images.clear();
+                list_of_images.push_back(*new_img3);
+                    
+                }
+                
+                
+            // TODO: find something that collerates to the actual image size that can be checked in-memory. Basically it's working.
+            } while (list_of_images.at(0).imageSize > 3000000);
+             
+             
+            // save the new image based on its memory address
+            cvSaveImage(b,&list_of_images.at(0));
+            */
+            
+            
+            /* with image saved to disk and reloaded each time */
+            
+            do{
+
+                a = a + 1;
+
+                imageToResize = *cvLoadImage(b, CV_LOAD_IMAGE_UNCHANGED);
+
+                const int new_width = (int) ((float) imageToResize.width * 0.99);
+                const int new_height = (int) ((float) imageToResize.height * 0.99);
+
+                new_img2 = cvCreateImage(cvSize(new_width, new_height), new_img->depth, new_img->nChannels);
+                cvResize(new_img, new_img2);
+                cvSaveImage(b,new_img2);
+                cvReleaseImage(&new_img2);
+
+                fsize_ = FileUtil::filesize(b);
+
+            
+            } while (fsize_ > 250000);
+            
+            
+
+            std::cout << b << " Passes made:" << a << std::endl;
+
+        }
+    }
+    
+    /*
     try
     {
         
@@ -144,7 +298,7 @@ int main(int argc, const char * argv[]) {
         std::cout << "Height : " << image.rows << std::endl;
         
         std::streampos fsize_;
-        fsize_ = FileUtil::filesize("/Users/georgegaspar/Pictures/movies/new_interstellar.png");
+        fsize_ = FileUtil::filesize("/Users/georgegaspar/Pictures/movies/interstellar.jpg");
         std::cout << "File size: " << fsize_ << " bytes" << std::endl;
 
         
@@ -168,8 +322,10 @@ int main(int argc, const char * argv[]) {
 
         cv::imencode("*.jpg", dst, buf, params);
         std::cout << "Buffer Size : " << BUFSIZ << "," << sizeof(buf) << std::endl;
+    
+        std::cout << "Size : " << dst.elemSize() << " bytes" << std::endl;
         
-    imwrite( "/Users/georgegaspar/Pictures/movies/new_interstellar.png", dst, compression_params);
+        cv::imwrite( "/Users/georgegaspar/Pictures/movies/new_interstellar.png", dst, compression_params);
 
     std::streampos fsize;
     fsize = FileUtil::filesize("/Users/georgegaspar/Pictures/movies/new_interstellar.png");
@@ -178,10 +334,20 @@ int main(int argc, const char * argv[]) {
     IplImage newImage;
     newImage =  *cvLoadImage("/Users/georgegaspar/Pictures/movies/interstellar.jpg", CV_LOAD_IMAGE_UNCHANGED);
         
-        CvMat encImage = *cvEncodeImage("*.jpg", &newImage, 0 );
-        cvDecodeImageM(&encImage, CV_LOAD_IMAGE_UNCHANGED);
+        const int new_width = (int) ((float) newImage.width * 0.75);
+        const int new_height = (int) ((float) newImage.height * 0.75);
+        IplImage* new_img = cvCreateImage(cvSize(new_width, new_height), newImage.depth, newImage.nChannels);
+        cvResize(&newImage, new_img);
+        
+        
+        CvMat encImage = *cvEncodeImage("*.jpg", new_img, 0 );
+       // cvDecodeImageM(&encImage, CV_LOAD_IMAGE_UNCHANGED);
+        
+        std::cout << "Size : " << new_img->imageSize << " bytes" << std::endl;
+        
+        cvSaveImage("/Users/georgegaspar/Pictures/movies/foo.png",new_img);
 
-        std::cout << "Size : " << newImage.imageSize << " bytes" << std::endl;
+        cv::imwrite( "/Users/georgegaspar/Pictures/movies/new_interstellar.png", dst, compression_params);
         
         newImage.~_IplImage();
     }
@@ -191,7 +357,7 @@ int main(int argc, const char * argv[]) {
         const char* err_msg = e.what();
         std::cout << "exception caught: " << err_msg << std::endl;
     }
-    
+    */
     
     std::cout << "Done \n";
     
