@@ -93,6 +93,8 @@
 				TargetAttributes = {
 					A409B6291CFCD64A005EC6C1 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = X8DL5FV4EA;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -101,6 +103,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = A409B6211CFCD64A005EC6C1;
@@ -211,6 +214,9 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X8DL5FV4EA;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include,
 					/opt/local/include,
@@ -241,6 +247,7 @@
 					"-lboost_filesystem",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Debug;
 		};
@@ -249,6 +256,9 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = X8DL5FV4EA;
 				HEADER_SEARCH_PATHS = (
 					/usr/local/include,
 					/opt/local/include,
@@ -279,6 +289,7 @@
 					"-lboost_filesystem",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 			};
 			name = Release;
 		};

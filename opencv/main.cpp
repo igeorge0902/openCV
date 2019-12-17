@@ -155,7 +155,15 @@ ImageUtil::~ImageUtil(void){
 
 int main(int argc, const char * argv[]) {
     
-    std::string directoryName_ = "/Users/georgegaspar/Pictures/movies/";
+    std::cout << "Hello: What's your directory to look for pictures?" << std::endl;
+
+    std::cout << "Example on MacOS: /Users/georgegaspar/Pictures/movies/raw/";
+    std::string name;
+    std::cin >> name;
+
+    std::cout << name;
+    
+    std::string directoryName_ = name;
     const char * directoryName = directoryName_.c_str();
 
     FileUtil fileutil;
