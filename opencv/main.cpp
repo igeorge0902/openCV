@@ -18,7 +18,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/highgui.hpp>
 
-#include "boost/filesystem.hpp" 
+#include "boost/filesystem.hpp"
 
 using namespace boost::filesystem;
 using namespace cv;
@@ -28,8 +28,6 @@ class ImageUtil{
 
 public:
     static IplImage cvCreateImage_(const int& new_width, const int& new_height, IplImage& image) {
-
-     //   cvSize(new_width,new_height);
 
         IplImage * new_img;
 
@@ -157,11 +155,11 @@ int main(int argc, const char * argv[]) {
     
     std::cout << "Hello: What's your directory to look for pictures?" << std::endl;
 
-    std::cout << "Example on MacOS: /Users/georgegaspar/Pictures/movies/raw/";
+    std::cout << "Example on MacOS: /Users/georgegaspar/Pictures/movies/\n";
     std::string name;
     std::cin >> name;
 
-    std::cout << name;
+    //std::cout << name;
     
     std::string directoryName_ = name;
     const char * directoryName = directoryName_.c_str();
@@ -181,7 +179,6 @@ int main(int argc, const char * argv[]) {
     IplImage imageToResize;
     IplImage * new_img;
     IplImage * new_img2;
-    IplImage * new_img3 = nullptr;
 
     
     for(auto i = 0; i != fileutil.list_of_filesnames.size(); i++) {
@@ -193,8 +190,9 @@ int main(int argc, const char * argv[]) {
         
         fsize_ = FileUtil::filesize(b);
         
+        // TODO: add target size as param through cin
         // first pass of resize for every image bigger than 250000 bytes
-        if (fsize_ > 250000) {
+        if (fsize_ > 50000) {
             
             imageToResize = *cvLoadImage(b, CV_LOAD_IMAGE_UNCHANGED);
             
@@ -207,66 +205,11 @@ int main(int argc, const char * argv[]) {
             new_img = cvCreateImage(cvSize(new_width, new_height), imageToResize.depth, imageToResize.nChannels);
             cvResize(&imageToResize, new_img);
             
-         //   cvSaveImage(b,new_img);
-            
-            std::vector<IplImage> list_of_images;
-
-            /* without image saved to disk */
-            // it will get blurred!!! -> it works like a xerox. The more "copy" you create, the more data you loose.  Funny.
+            cvSaveImage(b,new_img);
             
             // Local variable declaration:
             int a = 0;
-            /*
-            do{
-                
-                a = a + 1;
-                
-                const int new_width = (int) ((float) imageToResize.width * width);
-                const int new_height = (int) ((float) imageToResize.height * height);
-                
-                if (list_of_images.empty() == true) {
-                
-                // resize a new image
-                new_img2 = cvCreateImage(cvSize(new_width, new_height), new_img->depth, new_img->nChannels);
-                cvResize(new_img, new_img2);
-                
-                list_of_images.push_back(*new_img2);
-                
-                cvReleaseImage(&new_img2);
 
-
-                } else {
-                    
-                 if (new_img3 != NULL) {
-                 
-                     cvReleaseImage(&new_img3);
-
-                 }
-                    
-                const int new_width = (int) ((float) list_of_images.at(0).width * 0.99);
-                const int new_height = (int) ((float) list_of_images.at(0).height * 0.99);
-                    
-                new_img3 = cvCreateImage(cvSize(new_width, new_height), list_of_images.at(0).depth, list_of_images.at(0).nChannels);
-                    
-                cvResize(&list_of_images.at(0), new_img3);
-                    
-                list_of_images.clear();
-                list_of_images.push_back(*new_img3);
-                    
-                }
-                
-                
-            // TODO: find something that collerates to the actual image size that can be checked in-memory. Basically it's working.
-            } while (list_of_images.at(0).imageSize > 3000000);
-             
-             
-            // save the new image based on its memory address
-            cvSaveImage(b,&list_of_images.at(0));
-            */
-            
-            
-            /* with image saved to disk and reloaded each time */
-            
             do{
 
                 a = a + 1;
@@ -284,88 +227,14 @@ int main(int argc, const char * argv[]) {
                 fsize_ = FileUtil::filesize(b);
 
             
-            } while (fsize_ > 250000);
+            } while (fsize_ > 50000);
             
             
-
             std::cout << b << " Passes made:" << a << std::endl;
 
         }
     }
     
-    /*
-    try
-    {
-        
-    //TODO: iterate the folder, get size of the image, and decide if resize is neccessary
-
-        Mat image;
-        image = imread( "/Users/georgegaspar/Pictures/movies/interstellar.jpg", CV_LOAD_IMAGE_UNCHANGED );
-        
-        std::cout << "Width : " << image.cols << std::endl;
-        std::cout << "Height : " << image.rows << std::endl;
-        
-        std::streampos fsize_;
-        fsize_ = FileUtil::filesize("/Users/georgegaspar/Pictures/movies/interstellar.jpg");
-        std::cout << "File size: " << fsize_ << " bytes" << std::endl;
-
-        
-        Mat dst;
-        // image resizing
-        resize(image,dst, cv::Size(image.cols * 0.75,image.rows * 0.75), 0, 0, CV_INTER_LINEAR);
-        
-    
-        // compression settings
-        // we use vector out of convinience
-        std::vector<int> compression_params;
-        compression_params.push_back(IMWRITE_PNG_COMPRESSION);
-        compression_params.push_back(9);
-        
-        std::vector<int> params;
-        params.push_back(CV_IMWRITE_JPEG_QUALITY);
-        params.push_back(10);
-        
-        // we create a vector for buffer (vector doesn't have fix size, it grows along)
-        std::vector<unsigned char> buf;
-
-        cv::imencode("*.jpg", dst, buf, params);
-        std::cout << "Buffer Size : " << BUFSIZ << "," << sizeof(buf) << std::endl;
-    
-        std::cout << "Size : " << dst.elemSize() << " bytes" << std::endl;
-        
-        cv::imwrite( "/Users/georgegaspar/Pictures/movies/new_interstellar.png", dst, compression_params);
-
-    std::streampos fsize;
-    fsize = FileUtil::filesize("/Users/georgegaspar/Pictures/movies/new_interstellar.png");
-    std::cout << "File size: " << fsize << " bytes" << std::endl;
-        
-    IplImage newImage;
-    newImage =  *cvLoadImage("/Users/georgegaspar/Pictures/movies/interstellar.jpg", CV_LOAD_IMAGE_UNCHANGED);
-        
-        const int new_width = (int) ((float) newImage.width * 0.75);
-        const int new_height = (int) ((float) newImage.height * 0.75);
-        IplImage* new_img = cvCreateImage(cvSize(new_width, new_height), newImage.depth, newImage.nChannels);
-        cvResize(&newImage, new_img);
-        
-        
-        CvMat encImage = *cvEncodeImage("*.jpg", new_img, 0 );
-       // cvDecodeImageM(&encImage, CV_LOAD_IMAGE_UNCHANGED);
-        
-        std::cout << "Size : " << new_img->imageSize << " bytes" << std::endl;
-        
-        cvSaveImage("/Users/georgegaspar/Pictures/movies/foo.png",new_img);
-
-        cv::imwrite( "/Users/georgegaspar/Pictures/movies/new_interstellar.png", dst, compression_params);
-        
-        newImage.~_IplImage();
-    }
-    
-    catch( cv::Exception& e )
-    {
-        const char* err_msg = e.what();
-        std::cout << "exception caught: " << err_msg << std::endl;
-    }
-    */
     
     std::cout << "Done \n";
     
